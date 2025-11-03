@@ -9,5 +9,7 @@ dist/
 .vscode/
 .DS_Store
 
+# 日志
+logs/
 # 环境配置
 .env

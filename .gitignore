@@ -1,0 +1,13 @@
+# 依赖和构建产物
+node_modules/
+**/node_modules/
+campus-product-sys/target/
+dist/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# 环境配置
+.env

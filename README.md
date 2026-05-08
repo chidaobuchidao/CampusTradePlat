@@ -1,92 +1,131 @@
-# 🚀 项目名称
+# CampusTradePlat - 校园二手交易平台
 
 <div align="center">
 
 ![Vue](https://img.shields.io/badge/Vue-2.6.11-4FC08D?style=for-the-badge&logo=vue.js)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.x-6DB33F?style=for-the-badge&logo=springboot)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.2.4-6DB33F?style=for-the-badge&logo=springboot)
 ![Java](https://img.shields.io/badge/Java-8-007396?style=for-the-badge&logo=java)
+![MySQL](https://img.shields.io/badge/MySQL-5.7-4479A1?style=for-the-badge&logo=mysql)
 
-一个基于现代技术栈的前后端分离项目
+校园二手物品交易平台，支持商品发布、在线聊天议价、订单管理、论坛交流等功能。
 
 </div>
 
-## 📋 项目简介
+## 项目简介
 
-1. 此项目使用Springboot+Vue，使用MySql作为数据库。
-2. 本项目最终将实现一个基础交易平台的功能
-3. 目前以实现功能：已经实现增添用户；管理员面板管理所有用户；添加商品类别
-4. 请善用AI进行理解和生产帮助
+基于 Spring Boot + Vue 2 的前后端分离校园二手交易平台。买家和卖家可以通过站内消息实时沟通、发送订单卡片、协商价格，完成从下单到评价的完整交易闭环。
 
-## 🛠️ 技术栈
+## 功能特性
 
-### 🎨 前端技术
+### 用户端
 
-<div align="center">
+- **商品浏览与搜索** - 分类浏览、关键词搜索、个性化推荐（基于浏览历史）
+- **商品详情** - 多图展示、新旧程度标记、砍价支持、收藏功能
+- **站内聊天** - 买家卖家实时消息、订单卡片发送、修改价格、发货/收货确认
+- **订单管理** - 完整订单状态机（待支付 → 已支付 → 已发货 → 已收货 → 已评价 → 已完成）
+- **交易评价** - 买家对卖家评分（1-5星）+ 文字评价，展示在卖家个人主页
+- **用户主页** - 个人信息、发布的商品列表、收到的评价与平均评分
+- **个人中心** - 资料编辑、收货地址管理、收支数据统计（ECharts 图表）、订单统计、密码修改
+- **论坛社区** - 发帖、浏览、评论互动
 
-| 技术 | 版本 | 说明 |
+### 管理端
+
+- 仪表盘数据概览（ECharts）
+- 用户管理（封禁/解封、禁言）
+- 商品管理
+- 商品类别管理
+- 评论管理
+
+## 技术栈
+
+| 层级 | 技术 | 说明 |
 |------|------|------|
-| <img src="https://img.shields.io/badge/Vue.js-2.6.11-4FC08D?logo=vue.js&style=flat-square" width="120"> | 2.6.11 | 渐进式JavaScript框架 |
-| <img src="https://img.shields.io/badge/Vuex-3.x-4FC08D?logo=vue.js&style=flat-square" width="120"> | 3.x | 状态管理模式 |
-| <img src="https://img.shields.io/badge/Vue Router-3.x-4FC08D?logo=vue.js&style=flat-square" width="120"> | 3.x | 官方路由管理器 |
-| <img src="https://img.shields.io/badge/Element UI-2.x-409EFF?logo=element&style=flat-square" width="120"> | 2.x | 桌面端组件库 |
+| 前端 | Vue 2.6 + Vue Router + Element UI | 单页应用，组件化开发 |
+| 图表 | ECharts 4.8 | 收支统计、订单分布图表 |
+| 富文本 | WangEditor 5 | 商品描述、论坛发帖 |
+| 后端 | Spring Boot 2.2.4 + MyBatis | RESTful API，AOP 权限控制 |
+| 数据库 | MySQL 5.7 | 10 张业务表 |
+| 认证 | JWT + 自定义 @Protector 注解 | 基于 AOP 的接口鉴权 |
 
-</div>
+## 项目结构
 
-### ⚙️ 后端技术
+```
+campus-product-sys/          # 后端 (Spring Boot)
+├── src/main/java/cn/kmbeast/
+│   ├── controller/          # 接口层
+│   ├── service/             # 业务层
+│   ├── mapper/              # 数据访问层
+│   ├── pojo/                # 实体、DTO、VO
+│   ├── aop/                 # AOP 切面（权限、分页）
+│   ├── context/             # ThreadLocal 用户上下文
+│   └── Interceptor/         # JWT 拦截器
+└── src/main/resources/
+    ├── mapper/              # MyBatis XML
+    └── application.yml      # 配置文件
 
-<div align="center">
+campus-product-view/         # 前端 (Vue 2)
+├── src/
+│   ├── views/
+│   │   ├── user/            # 用户端页面
+│   │   ├── admin/           # 管理端页面
+│   │   ├── login/           # 登录注册
+│   │   └── register/
+│   ├── components/          # 公共组件
+│   ├── router/              # 路由配置
+│   └── utils/               # 工具函数（请求封装、存储、插件）
+└── package.json
+```
 
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| <img src="https://img.shields.io/badge/Java-8-007396?logo=java&style=flat-square" width="120"> | 8 | 编程语言 |
-| <img src="https://img.shields.io/badge/Spring Boot-2.x-6DB33F?logo=springboot&style=flat-square" width="120"> | 2.x | 应用框架 |
-| <img src="https://img.shields.io/badge/MyBatis-3.x-000000?logo=mybatis&style=flat-square" width="120"> | 3.x | ORM框架 |
-| <img src="https://img.shields.io/badge/Redis-5.x-DC382D?logo=redis&style=flat-square" width="120"> | 5.x | 缓存数据库 |
-| <img src="https://img.shields.io/badge/Node.js-14.x-339933?logo=nodedotjs&style=flat-square" width="120"> | 14.x | JavaScript运行时 |
-| <img src="https://img.shields.io/badge/Maven-3.x-C71A36?logo=apache-maven&style=flat-square" width="120"> | 3.x | 项目构建工具 |
-
-</div>
-
-## 🚀 快速开始
+## 快速开始
 
 ### 环境要求
 
-- Node.js ≥ 14.x
-- Java 8
-- Redis ≥ 5.x
-- Maven ≥ 3.x
+- JDK 8
+- Maven 3.x
+- MySQL 5.7+
+- Node.js 14+
 
-### 📦 前端启动
+### 数据库初始化
 
 ```bash
-# 进入前端目录
-cd 目标文件夹路径
+mysql -u root -p < campus-product.sql
+```
 
-# 安装依赖
-npm i
+默认管理员账号：`admin` / `123456`
 
-# 启动开发服务器
+### 后端启动
+
+```bash
+cd campus-product-sys
+# 修改 application.yml 中的数据库连接信息
+mvn spring-boot:run
+```
+
+后端默认运行在 `http://localhost:21090`，接口前缀 `/api/campus-product-sys/v1.0`
+
+### 前端启动
+
+```bash
+cd campus-product-view
+npm install
 npm run dev
 ```
 
-## ⚡ 核心特性
+前端默认运行在 `http://localhost:8080`
 
-### ✨ 前端特性
-- 🎯 **响应式设计** - 完美适配各种屏幕尺寸
-- 🎨 **现代化UI** - 基于Element UI的优雅界面
-- 📱 **组件化开发** - 可复用的Vue组件
-- 🚦 **路由守卫** - 完善的权限控制机制
-- 💾 **状态管理** - Vuex统一状态管理
+## 订单状态机
 
-### 🔧 后端特性
-- ⚡ **快速开发** - Spring Boot开箱即用
-- 🗄️ **数据持久化** - MyBatis轻量级ORM
-- 🔄 **缓存支持** - Redis高性能缓存
-- 📊 **监控管理** - 内置健康检查和指标监控
-- 🛡️ **安全可靠** - 完善的安全机制
+```
+下单(0) → 付款(1) → 发货(2) → 收货(3) → 评价(4) → 完成(4)
+  │                                                  │
+  └──────────── 取消(5) ←────────────────────────────┘
+```
 
-<div align="center">
-
-**如果这个项目对您有帮助，请给一个⭐️ Star支持一下！**
-
-</div>
+| 状态 | 含义 | 操作方 |
+|------|------|--------|
+| 0 | 待支付 | 买家下单 |
+| 1 | 已支付/待发货 | 买家付款 |
+| 2 | 已发货/待收货 | 卖家发货 |
+| 3 | 已收货/待评价 | 买家确认收货 |
+| 4 | 交易完成 | 评价后自动完成 |
+| 5 | 已取消 | 买卖双方可取消 |

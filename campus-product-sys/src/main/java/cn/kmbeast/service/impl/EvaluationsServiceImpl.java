@@ -2,7 +2,9 @@ package cn.kmbeast.service.impl;
 
 import cn.kmbeast.context.LocalThreadHolder;
 import cn.kmbeast.mapper.EvaluationsMapper;
+import cn.kmbeast.mapper.OrdersMapper;
 import cn.kmbeast.mapper.UserMapper;
+import cn.kmbeast.pojo.entity.Orders;
 import cn.kmbeast.pojo.api.ApiResult;
 import cn.kmbeast.pojo.api.PageResult;
 import cn.kmbeast.pojo.api.Result;
@@ -29,6 +31,8 @@ public class EvaluationsServiceImpl implements EvaluationsService {
     private EvaluationsMapper evaluationsMapper;
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private OrdersMapper ordersMapper;
 
     /**
      * 评论
@@ -40,10 +44,37 @@ public class EvaluationsServiceImpl implements EvaluationsService {
         evaluations.setCommenterId(LocalThreadHolder.getUserId());
         User queryConditionEntity = User.builder().id(LocalThreadHolder.getUserId()).build();
         User user = userMapper.getByActive(queryConditionEntity);
+        if (user == null) {
+            return ApiResult.error("用户不存在");
+        }
         if (user.getIsWord()) {
             return ApiResult.error("账户已被禁言");
         }
-        // TODO 需要发通知！
+
+        // 用户评价校验
+        if ("USER".equals(evaluations.getContentType())) {
+            if (evaluations.getOrderId() == null) {
+                return ApiResult.error("用户评价必须关联订单");
+            }
+            Orders order = ordersMapper.getById(evaluations.getOrderId());
+            if (order == null) {
+                return ApiResult.error("关联订单不存在");
+            }
+            if (order.getStatus() != 3 && order.getStatus() != 4) {
+                return ApiResult.error("只能评价已收货或已完成的订单");
+            }
+            if (!LocalThreadHolder.getUserId().equals(order.getUserId())) {
+                return ApiResult.error("只有买家可以评价");
+            }
+            if (evaluationsMapper.countByOrderId(evaluations.getOrderId()) > 0) {
+                return ApiResult.error("该订单已评价，不可重复评价");
+            }
+            // contentId = 被评价用户ID（卖家）
+            if (evaluations.getRating() == null || evaluations.getRating() < 1 || evaluations.getRating() > 5) {
+                return ApiResult.error("评分必须在1-5之间");
+            }
+        }
+
         evaluations.setCreateTime(LocalDateTime.now());
         evaluationsMapper.save(evaluations);
         return ApiResult.success("评论成功");
@@ -102,9 +133,8 @@ public class EvaluationsServiceImpl implements EvaluationsService {
      * @return 点赞数
      */
     private int countVotes(String voteStr) {
-        return Optional.ofNullable(voteStr)
-                .map(s -> s.split(",").length)
-                .orElse(0);
+        if (voteStr == null || voteStr.isEmpty()) return 0;
+        return voteStr.split(",").length;
     }
 
     /**
@@ -137,9 +167,7 @@ public class EvaluationsServiceImpl implements EvaluationsService {
      */
     @Override
     public Result<String> delete(Integer id) {
-        ArrayList<Integer> ids = new ArrayList<>();
-        ids.add(id);
-        evaluationsMapper.batchDelete(ids);
+        evaluationsMapper.batchDelete(Collections.singletonList(id));
         return ApiResult.success();
     }
 
@@ -153,5 +181,11 @@ public class EvaluationsServiceImpl implements EvaluationsService {
         // TODO 点赞需要做通知
         evaluationsMapper.update(evaluations);
         return ApiResult.success();
+    }
+
+    @Override
+    public Result<Map<String, Object>> avgRating(Integer userId) {
+        Map<String, Object> result = evaluationsMapper.avgRating(userId);
+        return ApiResult.success(result);
     }
 }

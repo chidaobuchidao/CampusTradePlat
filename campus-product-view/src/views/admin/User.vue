@@ -29,7 +29,7 @@
             <el-table :stripe="true" :data="tableData" style="width: 100%">
                 <el-table-column prop="userAvatar" width="68" label="头像">
                     <template slot-scope="scope">
-                        <el-avatar :size="25" :src="scope.row.userAvatar" style="margin-top: 10px;"></el-avatar>
+                        <el-avatar :size="25" :src="$imgUrl(scope.row.userAvatar)" style="margin-top: 10px;"></el-avatar>
                     </template>
                 </el-table-column>
                 <el-table-column prop="userName" label="名称"></el-table-column>
@@ -84,7 +84,7 @@
                     <el-upload class="avatar-uploader"
                         action="http://localhost:21090/api/campus-product-sys/v1.0/file/upload" :show-file-list="false"
                         :on-success="handleAvatarSuccess">
-                        <img v-if="userAvatar" :src="userAvatar" class="dialog-avatar">
+                        <img v-if="userAvatar" :src="$imgUrl(userAvatar)" class="dialog-avatar">
                         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                     </el-upload>
                 </el-row>
@@ -217,7 +217,7 @@ export default {
             });
             // 上传成功则更新用户头像
             if (res.code === 200) {
-                this.userAvatar = res.data;
+                this.userAvatar = res.data || res.msg;
             }
         },
         // 批量删除数据

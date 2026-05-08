@@ -5,7 +5,7 @@
             <p>*头像</p>
             <el-upload class="avatar-uploader" action="http://localhost:21090/api/campus-product-sys/v1.0/file/upload" :show-file-list="false"
                 :on-success="handleAvatarSuccess">
-                <img v-if="userAvatar" :src="userAvatar" style="width: 88px;height: 88px;">
+                <img v-if="userAvatar" :src="$imgUrl(userAvatar)" style="width: 88px;height: 88px;">
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
         </div>
@@ -99,9 +99,8 @@ export default {
                 message: res.code === 200 ? '上传成功' : '上传失败',
                 type: res.code === 200 ? 'success' : 'error'
             });
-            // 上传成功则更新用户头像
             if (res.code === 200) {
-                this.userAvatar = res.data;
+                this.userAvatar = res.data || res.msg;
             }
         },
         // Token 检验 ,取得用户信息

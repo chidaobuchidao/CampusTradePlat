@@ -118,6 +118,7 @@ public class UserController {
      * @param map 修改信息入参
      * @return Result<String> 响应结果
      */
+    @Protector
     @PutMapping(value = "/updatePwd")
     @ResponseBody
     public Result<String> updatePwd(@RequestBody Map<String, String> map) {
@@ -146,6 +147,18 @@ public class UserController {
     @ResponseBody
     public Result<List<User>> query(@RequestBody UserQueryDto userQueryDto) {
         return userService.query(userQueryDto);
+    }
+
+    /**
+     * 公开用户主页信息（无需登录）
+     *
+     * @param id 用户ID
+     * @return Result<UserVO>
+     */
+    @GetMapping(value = "/profile/{id}")
+    @ResponseBody
+    public Result<UserVO> profile(@PathVariable Integer id) {
+        return userService.getById(id);
     }
 }
 

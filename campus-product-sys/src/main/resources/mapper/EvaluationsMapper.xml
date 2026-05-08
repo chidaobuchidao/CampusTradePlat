@@ -33,6 +33,7 @@
     <select id="getParentComments" resultMap="commentParentResultMap">
         SELECT e.id                                                            AS id,
                e.content                                                       AS content,
+               e.rating                                                        AS rating,
                e.upvote_list                                                   AS upvoteList,
                e.create_time                                                   AS create_time,
                u.id                                                            AS user_id,
@@ -99,7 +100,7 @@
             </if>
         </where>
         ORDER BY e.create_time DESC
-        <if test="current != null and size != ''">
+        <if test="current != null and size != null">
             LIMIT #{current},#{size}
         </if>
     </select>
@@ -110,7 +111,7 @@
         FROM evaluations e
         <where>
             <if test="contentType != null and contentType != ''">
-                AND e.content_type like concat('%',#{contentType},'%')
+                AND e.content_type = #{contentType}
             </if>
             <if test="content != null and content != ''">
                 AND e.content like concat('%',#{content},'%')
@@ -133,14 +134,14 @@
     <!--评论信息新增-->
     <insert id="save">
         INSERT INTO evaluations(parent_id, commenter_id, replier_id, content_type, content_id, content,
-                                upvote_list, create_time)
+                                upvote_list, create_time, rating, order_id)
         VALUES (#{parentId}, #{commenterId}, #{replierId}, #{contentType}, #{contentId}, #{content},
-                #{upvoteList}, #{createTime})
+                #{upvoteList}, #{createTime}, #{rating}, #{orderId})
     </insert>
 
     <!--    批量查询二级评论信息-->
     <select id="selectChildComments" parameterType="list" resultType="Integer">
-        SELECT e.id FROM evaluations e WHERE e.parentId IN
+        SELECT e.id FROM evaluations e WHERE e.parent_id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
@@ -152,6 +153,19 @@
         FROM evaluations e
         WHERE e.content_id = #{contentId}
           AND e.content_type = #{contentType}
+    </select>
+
+    <!-- 查询用户平均评分 -->
+    <select id="avgRating" resultType="java.util.HashMap">
+        SELECT IFNULL(ROUND(AVG(rating), 1), 0) AS avgRating,
+               COUNT(*) AS total
+        FROM evaluations
+        WHERE content_id = #{userId} AND content_type = 'USER'
+    </select>
+
+    <!-- 检查是否已对某订单评价过 -->
+    <select id="countByOrderId" resultType="integer">
+        SELECT COUNT(*) FROM evaluations WHERE order_id = #{orderId} AND content_type = 'USER'
     </select>
 
 </mapper>

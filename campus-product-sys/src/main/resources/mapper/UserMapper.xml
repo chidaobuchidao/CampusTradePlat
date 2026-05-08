@@ -39,6 +39,9 @@
             <if test="userEmail != null">
                 user_email = #{userEmail},
             </if>
+            <if test="signature != null">
+                signature = #{signature},
+            </if>
             <if test="isLogin != null">
                 is_login = #{isLogin},
             </if>
@@ -94,7 +97,7 @@
                 AND u.user_email LIKE concat('%',#{userEmail},'%')
             </if>
             <if test="role != null">
-                AND u.role = #{role}
+                AND u.user_role = #{role}
             </if>
             <if test="isLogin != null">
                 AND u.is_login = #{isLogin}
@@ -128,7 +131,7 @@
                 AND u.user_email LIKE concat('%',#{userEmail},'%')
             </if>
             <if test="role != null">
-                AND u.role = #{role}
+                AND u.user_role = #{role}
             </if>
             <if test="isLogin != null">
                 AND u.is_login = #{isLogin}
@@ -151,11 +154,23 @@
         <result column="user_pwd" property="userPwd"/>
         <result column="user_avatar" property="userAvatar"/>
         <result column="user_email" property="userEmail"/>
+        <result column="signature" property="signature"/>
         <result column="user_role" property="userRole"/>
         <result column="is_login" property="isLogin"/>
         <result column="is_word" property="isWord"/>
         <result column="create_time" property="createTime"/>
     </resultMap>
 
+    <select id="countByRole" resultType="java.util.HashMap">
+        SELECT user_role AS role, COUNT(*) AS count FROM user GROUP BY user_role
+    </select>
+
+    <select id="countByDay" resultType="java.util.HashMap">
+        SELECT DATE(create_time) AS day, COUNT(*) AS count
+        FROM user
+        WHERE create_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        GROUP BY DATE(create_time)
+        ORDER BY day
+    </select>
 
 </mapper>

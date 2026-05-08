@@ -3,23 +3,17 @@
 <mapper namespace="cn.kmbeast.mapper.CategoryMapper">
 
     <insert id="save">
-        INSERT INTO category (name,is_use)
-        VALUES (#{name},#{isUse})
+        INSERT INTO category (name, is_use, parent_id)
+        VALUES (#{name}, #{isUse}, #{parentId})
     </insert>
 
     <update id="update">
         UPDATE category
         <set>
-            <if test="name != null and name != ''">
-                name = #{name},
-            </if>
-
-            <if test="isUse != null">
-                is_use = #{isUse},
-            </if>
-
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="isUse != null">is_use = #{isUse},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
         </set>
-
         WHERE id = #{id}
     </update>
 
@@ -44,39 +38,39 @@
             <if test="isUse != null">
                 AND c.is_use = #{isUse}
             </if>
-
+            <if test="parentId != null">
+                AND c.parent_id = #{parentId}
+            </if>
         </where>
 
-        ORDER BY c.id DESC
+        ORDER BY c.id ASC
         <if test="current != null and size != null">
             LIMIT #{current},#{size}
         </if>
 
     </select>
 
-    <!--满足分页条件的数据总项-->
     <select id="queryCount" resultType="integer">
-
         SELECT COUNT(*)
         FROM category c
         <where>
             <if test="name != null and name != ''">
                 AND c.name LIKE concat('%',#{name},'%')
             </if>
-
             <if test="isUse != null">
                 AND c.is_use = #{isUse}
             </if>
-
+            <if test="parentId != null">
+                AND c.parent_id = #{parentId}
+            </if>
         </where>
-
     </select>
 
-    <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="cn.kmbeast.pojo.entity.Category">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="is_use" property="isUse"/>
+        <result column="parent_id" property="parentId"/>
     </resultMap>
 
 

@@ -16,25 +16,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class Message {
-    /**
-     * ID
-     */
     private Integer id;
-    /**
-     * 用户ID
-     */
+    // 保留旧字段兼容
     private Integer userId;
-    /**
-     * 消息体
-     */
+    // 私聊新增
+    private Integer senderId;
+    private Integer receiverId;
+    private Integer productId;
     private String content;
-    /**
-     * 是否已读
-     */
     private Boolean isRead;
-    /**
-     * 发送时间
-     */
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 }

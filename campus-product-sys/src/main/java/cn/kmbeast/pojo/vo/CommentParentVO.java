@@ -53,6 +53,10 @@ public class CommentParentVO {
      */
     private Integer upvoteCount;
     /**
+     * 评分(1-5)，仅用户评价类型
+     */
+    private Integer rating;
+    /**
      * 评论时间
      */
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

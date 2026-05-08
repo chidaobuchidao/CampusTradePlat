@@ -11,14 +11,14 @@ import lombok.Getter;
 public enum LoginStatusEnum {
 
     USE(false, "可登录"),
-    BANK_USE(true, "登录状态异常");
+    BAN_USE(true, "登录状态异常");
 
     /**
      * 编码
      */
     private final Boolean flag;
     /**
-     * 名成
+     * 名称
      */
     private final String name;
 

@@ -40,6 +40,11 @@ public class UserVO {
     private String userEmail;
 
     /**
+     * 个人签名
+     */
+    private String signature;
+
+    /**
      * 用户角色
      */
     private Integer userRole;

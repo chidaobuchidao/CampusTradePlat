@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * 该注解加在接口上，接口自动鉴权，并解析用户身份信息。
  * 符合用户身份的，才能使用具体接口功能。
  */
-@Target({ElementType.PARAMETER, ElementType.METHOD})
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Protector {
     /**

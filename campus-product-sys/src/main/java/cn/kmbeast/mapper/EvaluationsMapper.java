@@ -7,6 +7,7 @@ import cn.kmbeast.pojo.vo.CommentParentVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 评论持久化接口
@@ -76,5 +77,21 @@ public interface EvaluationsMapper {
      * @param evaluations 评论实体
      */
     void update(Evaluations evaluations);
+
+    /**
+     * 查询用户平均评分
+     *
+     * @param userId 用户ID
+     * @return 评分统计
+     */
+    Map<String, Object> avgRating(@Param("userId") Integer userId);
+
+    /**
+     * 检查订单是否已评价
+     *
+     * @param orderId 订单ID
+     * @return 评价数
+     */
+    int countByOrderId(@Param("orderId") Integer orderId);
 
 }

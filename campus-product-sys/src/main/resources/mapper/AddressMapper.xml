@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kmbeast.mapper.AddressMapper">
+
+    <resultMap id="BaseResultMap" type="cn.kmbeast.pojo.entity.Address">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="address" property="address"/>
+        <result column="is_default" property="isDefault"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO address (user_id, name, phone, address, is_default, create_time)
+        VALUES (#{userId}, #{name}, #{phone}, #{address}, #{isDefault}, NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE address
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="isDefault != null">is_default = #{isDefault},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM address WHERE id = #{id}
+    </delete>
+
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT * FROM address WHERE user_id = #{userId} ORDER BY is_default DESC, create_time DESC
+    </select>
+
+    <select id="getById" resultMap="BaseResultMap">
+        SELECT * FROM address WHERE id = #{id}
+    </select>
+
+    <update id="clearDefault">
+        UPDATE address SET is_default = 0 WHERE user_id = #{userId}
+    </update>
+
+    <update id="setDefault">
+        UPDATE address SET is_default = 1 WHERE id = #{id} AND user_id = #{userId}
+    </update>
+
+</mapper>

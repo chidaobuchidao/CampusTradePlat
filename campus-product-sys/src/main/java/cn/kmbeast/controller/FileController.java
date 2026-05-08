@@ -38,21 +38,20 @@ public class FileController {
     public Map<String, Object> uploadFile(@RequestParam("file") MultipartFile multipartFile) {
         String uuid = IdFactoryUtil.getFileId();
         String fileName = uuid + multipartFile.getOriginalFilename();
-        Map<String, Object> rep = new HashMap<>();
+        String fileUrl = URL + API + "/file/getFile?fileName=" + fileName;
+        Map<String, Object> result = new HashMap<>();
         try {
-            if (uploadFile(multipartFile, fileName)) {
-                rep.put("code", 200);
-                rep.put("data", URL + API+ "/file/getFile?fileName=" + fileName);
-                return rep;
+            if (uploadFileInternal(multipartFile, fileName)) {
+                result.put("code", 200);
+                result.put("data", fileUrl);
+                return result;
             }
         } catch (IOException e) {
-            rep.put("code", 400);
-            rep.put("msg", "文件上传异常");
-            return rep;
+            //
         }
-        rep.put("code", 400);
-        rep.put("msg", "文件上传异常");
-        return rep;
+        result.put("code", 400);
+        result.put("msg", "文件上传异常");
+        return result;
     }
 
     /**
@@ -65,37 +64,26 @@ public class FileController {
     public Map<String, Object> videoUpload(@RequestParam("file") MultipartFile multipartFile) {
         String uuid = IdFactoryUtil.getFileId();
         String fileName = uuid + multipartFile.getOriginalFilename();
-        Map<String, Object> rep = new HashMap<>();
-
+        String fileUrl = URL + API + "/file/getFile?fileName=" + fileName;
+        Map<String, Object> result = new HashMap<>();
         try {
-            if (uploadFile(multipartFile, fileName)) {
-                rep.put("code", 200);
-                rep.put("data", API+ "/file/getFile?fileName=" + fileName);
-                return rep;
+            if (uploadFileInternal(multipartFile, fileName)) {
+                result.put("code", 200);
+                result.put("data", fileUrl);
+                return result;
             }
         } catch (IOException e) {
-            rep.put("code", 400);
-            rep.put("msg", "文件上传异常");
-            return rep;
+            //
         }
-        rep.put("code", 400);
-        rep.put("msg", "文件上传异常");
-        return rep;
+        result.put("code", 400);
+        result.put("msg", "文件上传异常");
+        return result;
     }
 
     /**
-     * 上传文件
-     *
-     * @param multipartFile 文件流
-     * @param fileName      文件名
-     * @return boolean
-     * @throws IOException 异常
+     * 上传文件到磁盘
      */
-    public boolean uploadFile(MultipartFile multipartFile, String fileName) throws IOException {
-        return fileName(multipartFile, fileName);
-    }
-
-    public static boolean fileName(MultipartFile multipartFile, String fileName) throws IOException {
+    private boolean uploadFileInternal(MultipartFile multipartFile, String fileName) throws IOException {
         File fileDir = new File(PathUtils.getClassLoadRootPath() + "/pic");
         if (!fileDir.exists()) {
             if (!fileDir.mkdirs()) {
@@ -122,22 +110,42 @@ public class FileController {
      * @param response  响应
      * @throws IOException 异常
      */
+    private String getContentTypeByExtension(String fileName) {
+        String lower = fileName.toLowerCase();
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+        if (lower.endsWith(".png")) return "image/png";
+        if (lower.endsWith(".gif")) return "image/gif";
+        if (lower.endsWith(".webp")) return "image/webp";
+        if (lower.endsWith(".bmp")) return "image/bmp";
+        if (lower.endsWith(".svg")) return "image/svg+xml";
+        return "application/octet-stream";
+    }
+
     @GetMapping("/getFile")
     public void getImage(@RequestParam("fileName") String imageName,
                          HttpServletResponse response) throws IOException {
+        // 防止路径穿越
+        if (imageName.contains("..") || imageName.contains("/") || imageName.contains("\\")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
         File fileDir = new File(PathUtils.getClassLoadRootPath() + "/pic");
         File image = new File(fileDir.getAbsolutePath() + "/" + imageName);
-        if (image.exists()) {
-            FileInputStream fileInputStream = new FileInputStream(image);
-            byte[] bytes = new byte[fileInputStream.available()];
-            if (fileInputStream.read(bytes) > 0) {
-                OutputStream outputStream = response.getOutputStream();
-                outputStream.write(bytes);
-                outputStream.close();
+        if (!image.exists()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        response.setContentType(getContentTypeByExtension(imageName));
+        response.setContentLengthLong(image.length());
+        try (FileInputStream fileInputStream = new FileInputStream(image);
+             OutputStream outputStream = response.getOutputStream()) {
+            byte[] bytes = new byte[4096];
+            int len;
+            while ((len = fileInputStream.read(bytes)) > 0) {
+                outputStream.write(bytes, 0, len);
             }
-            fileInputStream.close();
+            outputStream.flush();
         }
     }
 
 }
-

@@ -20,10 +20,11 @@ public class Category {
     /**
      * 商品类别名称
      */
-    private String Name;
+    private String name;
     /**
      * 是否启用
      */
     private Boolean isUse;
+    private Integer parentId;
 
 }

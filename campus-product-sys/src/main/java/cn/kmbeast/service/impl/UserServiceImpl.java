@@ -16,11 +16,13 @@ import cn.kmbeast.pojo.entity.User;
 import cn.kmbeast.pojo.vo.UserVO;
 import cn.kmbeast.service.UserService;
 import cn.kmbeast.utils.JwtUtil;
+import cn.kmbeast.utils.PathUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +50,7 @@ public class UserServiceImpl implements UserService {
         User entity = userMapper.getByActive(
                 User.builder().userAccount(userRegisterDTO.getUserAccount()).build()
         );
-        if (Objects.nonNull(entity)) {
+        if (entity != null) {
             return ApiResult.error("账号不可用");
         }
         User saveEntity = User.builder()
@@ -76,7 +78,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.getByActive(
                 User.builder().userAccount(userLoginDTO.getUserAccount()).build()
         );
-        if (!Objects.nonNull(user)) {
+        if (user == null) {
             return ApiResult.error("账号不存在");
         }
         if (!Objects.equals(userLoginDTO.getUserPwd(), user.getUserPwd())) {
@@ -102,9 +104,7 @@ public class UserServiceImpl implements UserService {
         Integer userId = LocalThreadHolder.getUserId();
         User queryEntity = User.builder().id(userId).build();
         User user = userMapper.getByActive(queryEntity);
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        return ApiResult.success(userVO);
+        return ApiResult.success(toUserVO(user));
     }
 
     /**
@@ -128,7 +128,15 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Result<String> update(UserUpdateDTO userUpdateDTO) {
-        User updateEntity = User.builder().id(LocalThreadHolder.getUserId()).build();
+        Integer userId = LocalThreadHolder.getUserId();
+        // 新旧头像不同时，删除旧头像文件
+        if (userUpdateDTO.getUserAvatar() != null) {
+            User oldUser = userMapper.getByActive(User.builder().id(userId).build());
+            if (oldUser != null && !userUpdateDTO.getUserAvatar().equals(oldUser.getUserAvatar())) {
+                deleteAvatarFile(oldUser.getUserAvatar());
+            }
+        }
+        User updateEntity = User.builder().id(userId).build();
         BeanUtils.copyProperties(userUpdateDTO, updateEntity);
         userMapper.update(updateEntity);
         return ApiResult.success();
@@ -186,9 +194,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result<UserVO> getById(Integer id) {
         User user = userMapper.getByActive(User.builder().id(id).build());
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        return ApiResult.success(userVO);
+        if (user == null) {
+            return ApiResult.error("用户不存在");
+        }
+        return ApiResult.success(toUserVO(user));
     }
 
     /**
@@ -210,8 +219,38 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Result<String> backUpdate(User user) {
+        if (user.getUserAvatar() != null && user.getId() != null) {
+            User oldUser = userMapper.getByActive(User.builder().id(user.getId()).build());
+            if (oldUser != null && !user.getUserAvatar().equals(oldUser.getUserAvatar())) {
+                deleteAvatarFile(oldUser.getUserAvatar());
+            }
+        }
         userMapper.update(user);
         return ApiResult.success();
+    }
+
+    private UserVO toUserVO(User user) {
+        UserVO vo = new UserVO();
+        BeanUtils.copyProperties(user, vo);
+        return vo;
+    }
+
+    /**
+     * 删除旧头像文件
+     */
+    private void deleteAvatarFile(String avatarUrl) {
+        if (avatarUrl == null || avatarUrl.isEmpty()) return;
+        try {
+            String fileName = avatarUrl;
+            if (fileName.contains("fileName=")) {
+                fileName = fileName.substring(fileName.indexOf("fileName=") + 9);
+            }
+            File file = new File(PathUtils.getClassLoadRootPath() + "/pic/" + fileName);
+            if (file.exists()) {
+                file.delete();
+            }
+        } catch (Exception ignored) {
+        }
     }
 
 }

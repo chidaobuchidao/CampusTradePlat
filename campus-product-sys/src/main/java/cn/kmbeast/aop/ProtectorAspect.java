@@ -3,7 +3,7 @@ package cn.kmbeast.aop;
 import cn.kmbeast.context.LocalThreadHolder;
 import cn.kmbeast.pojo.api.ApiResult;
 import cn.kmbeast.pojo.em.RoleEnum;
-import cn.kmbeast.service.UserService;
+
 import cn.kmbeast.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -32,7 +32,6 @@ public class ProtectorAspect {
      *
      * @param proceedingJoinPoint 连接点
      * @return Object
-     * @author 【B站：程序员晨星】
      */
     @Around("@annotation(cn.kmbeast.aop.Protector)")
     public Object auth(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {

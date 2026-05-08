@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kmbeast.mapper.InteractionMapper">
+
+    <resultMap id="BaseResultMap" type="cn.kmbeast.pojo.entity.Interaction">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="product_id" property="productId"/>
+        <result column="action_type" property="actionType"/>
+        <result column="action_time" property="actionTime"/>
+    </resultMap>
+
+    <!-- 行为列表（带商品信息） -->
+    <resultMap id="InteractionProductResultMap" type="cn.kmbeast.pojo.entity.Interaction">
+        <id column="i_id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="product_id" property="productId"/>
+        <result column="action_type" property="actionType"/>
+        <result column="action_time" property="actionTime"/>
+    </resultMap>
+
+    <insert id="save">
+        INSERT INTO interaction (user_id, product_id, action_type, action_time)
+        VALUES (#{userId}, #{productId}, #{actionType}, #{actionTime})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM interaction
+        WHERE user_id = #{userId}
+          AND product_id = #{productId}
+          AND action_type = #{actionType}
+    </delete>
+
+    <select id="getByUserAndProduct" resultMap="BaseResultMap">
+        SELECT * FROM interaction
+        WHERE user_id = #{userId}
+          AND product_id = #{productId}
+          AND action_type = #{actionType}
+        LIMIT 1
+    </select>
+
+    <select id="query" resultType="java.util.HashMap">
+        SELECT i.id, i.user_id AS userId, i.product_id AS productId, i.action_type AS actionType,
+               i.action_time AS actionTime,
+               p.name AS productName, p.cover_list AS coverList, p.price AS productPrice
+        FROM interaction i
+        LEFT JOIN product p ON i.product_id = p.id
+        WHERE i.user_id = #{userId}
+          AND i.action_type = #{actionType}
+        ORDER BY i.action_time DESC
+        <if test="current != null and size != null">
+            LIMIT #{current},#{size}
+        </if>
+    </select>
+
+    <select id="queryCount" resultType="integer">
+        SELECT COUNT(*)
+        FROM interaction i
+        WHERE i.user_id = #{userId}
+          AND i.action_type = #{actionType}
+    </select>
+
+    <select id="getBrowsedProductIds" resultType="integer">
+        SELECT i.product_id FROM interaction i
+        JOIN product p ON i.product_id = p.id
+        WHERE i.user_id = #{userId} AND i.action_type = 2
+        ORDER BY i.action_time DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

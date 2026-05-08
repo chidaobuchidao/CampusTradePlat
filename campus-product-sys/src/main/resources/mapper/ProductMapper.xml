@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kmbeast.mapper.ProductMapper">
+
+    <resultMap id="BaseResultMap" type="cn.kmbeast.pojo.entity.Product">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="detail" property="detail"/>
+        <result column="cover_list" property="coverList"/>
+        <result column="old_level" property="oldLevel"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="user_id" property="userId"/>
+        <result column="inventory" property="inventory"/>
+        <result column="price" property="price"/>
+        <result column="is_bargain" property="isBargain"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="save">
+        INSERT INTO product (name, detail, cover_list, old_level, category_id, user_id, inventory, price, is_bargain, create_time)
+        VALUES (#{name}, #{detail}, #{coverList}, #{oldLevel}, #{categoryId}, #{userId}, #{inventory}, #{price}, #{isBargain}, #{createTime})
+    </insert>
+
+    <update id="update">
+        UPDATE product
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="detail != null">
+                detail = #{detail},
+            </if>
+            <if test="coverList != null">
+                cover_list = #{coverList},
+            </if>
+            <if test="oldLevel != null">
+                old_level = #{oldLevel},
+            </if>
+            <if test="categoryId != null">
+                category_id = #{categoryId},
+            </if>
+            <if test="inventory != null">
+                inventory = #{inventory},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="isBargain != null">
+                is_bargain = #{isBargain},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="batchDelete" parameterType="list">
+        DELETE FROM product WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getById" resultMap="BaseResultMap">
+        SELECT * FROM product WHERE id = #{id}
+    </select>
+
+    <select id="query" resultMap="BaseResultMap">
+        SELECT p.*
+        FROM product p
+        <where>
+            <if test="name != null and name != ''">
+                AND p.name LIKE concat('%',#{name},'%')
+            </if>
+            <if test="key != null and key != ''">
+                AND (p.name LIKE concat('%',#{key},'%') OR p.detail LIKE concat('%',#{key},'%'))
+            </if>
+            <if test="categoryId != null">
+                AND p.category_id = #{categoryId}
+            </if>
+            <if test="userId != null">
+                AND p.user_id = #{userId}
+            </if>
+            <if test="oldLevel != null">
+                AND p.old_level = #{oldLevel}
+            </if>
+            <if test="minPrice != null">
+                AND p.price &gt;= #{minPrice}
+            </if>
+            <if test="maxPrice != null">
+                AND p.price &lt;= #{maxPrice}
+            </if>
+            <if test="includeSoldOut == null or includeSoldOut == false">
+                AND p.inventory > 0
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND p.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+        ORDER BY p.create_time DESC
+        <if test="current != null and size != null">
+            LIMIT #{current},#{size}
+        </if>
+    </select>
+
+    <select id="queryCount" resultType="integer">
+        SELECT COUNT(*)
+        FROM product p
+        <where>
+            <if test="name != null and name != ''">
+                AND p.name LIKE concat('%',#{name},'%')
+            </if>
+            <if test="key != null and key != ''">
+                AND (p.name LIKE concat('%',#{key},'%') OR p.detail LIKE concat('%',#{key},'%'))
+            </if>
+            <if test="categoryId != null">
+                AND p.category_id = #{categoryId}
+            </if>
+            <if test="userId != null">
+                AND p.user_id = #{userId}
+            </if>
+            <if test="oldLevel != null">
+                AND p.old_level = #{oldLevel}
+            </if>
+            <if test="minPrice != null">
+                AND p.price &gt;= #{minPrice}
+            </if>
+            <if test="maxPrice != null">
+                AND p.price &lt;= #{maxPrice}
+            </if>
+            <if test="includeSoldOut == null or includeSoldOut == false">
+                AND p.inventory > 0
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND p.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="recommendByCategories" resultMap="BaseResultMap">
+        SELECT p.* FROM product p
+        <where>
+            AND p.inventory > 0
+            <if test="categoryIds != null and categoryIds.size() > 0">
+                AND p.category_id IN
+                <foreach collection="categoryIds" item="cid" open="(" separator="," close=")">
+                    #{cid}
+                </foreach>
+            </if>
+            <if test="excludeIds != null and excludeIds.size() > 0">
+                AND p.id NOT IN
+                <foreach collection="excludeIds" item="eid" open="(" separator="," close=")">
+                    #{eid}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY p.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

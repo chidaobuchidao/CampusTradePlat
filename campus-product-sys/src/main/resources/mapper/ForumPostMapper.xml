@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kmbeast.mapper.ForumPostMapper">
+
+    <resultMap id="BaseResultMap" type="cn.kmbeast.pojo.entity.ForumPost">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="user_id" property="userId"/>
+        <result column="category" property="category"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="save">
+        INSERT INTO forum_post (title, content, user_id, category, view_count, create_time)
+        VALUES (#{title}, #{content}, #{userId}, #{category}, 0, #{createTime})
+    </insert>
+
+    <update id="update">
+        UPDATE forum_post SET view_count = #{viewCount} WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM forum_post WHERE id = #{id}
+    </delete>
+
+    <select id="getById" resultMap="BaseResultMap">
+        SELECT * FROM forum_post WHERE id = #{id}
+    </select>
+
+    <select id="query" resultMap="BaseResultMap">
+        SELECT p.*, u.user_name, u.user_avatar
+        FROM forum_post p
+        LEFT JOIN user u ON u.id = p.user_id
+        <where>
+            <if test="title != null and title != ''">
+                AND p.title LIKE concat('%',#{title},'%')
+            </if>
+            <if test="category != null and category != ''">
+                AND p.category = #{category}
+            </if>
+            <if test="userId != null">
+                AND p.user_id = #{userId}
+            </if>
+        </where>
+        ORDER BY p.create_time DESC
+        <if test="current != null and size != null">
+            LIMIT #{current},#{size}
+        </if>
+    </select>
+
+    <select id="queryCount" resultType="integer">
+        SELECT COUNT(*) FROM forum_post p
+        <where>
+            <if test="title != null and title != ''">
+                AND p.title LIKE concat('%',#{title},'%')
+            </if>
+            <if test="category != null and category != ''">
+                AND p.category = #{category}
+            </if>
+            <if test="userId != null">
+                AND p.user_id = #{userId}
+            </if>
+        </where>
+    </select>
+
+</mapper>

@@ -30,20 +30,20 @@ public class PageResult<T> extends Result<T> {
      * 参数构造
      *
      * @param code 响应码
-     * @author 【B站：程序员晨星】
+     * @author 【chidao】
      */
     public PageResult(Integer code) {
         super(code, "查询成功");
     }
 
     /**
-     * 分页查血结果反馈
+     * 分页查询结果反馈
      *
      * @param data  数据源
      * @param total 总记录数
      * @param <T>   泛型
      * @return <T>
-     * @author 【B站：程序员晨星】
+     * @author 【chidao】
      */
     public static <T> Result<T> success(T data, Integer total) {
         PageResult<T> result = new PageResult<>(ResultCode.REQUEST_SUCCESS.getCode());

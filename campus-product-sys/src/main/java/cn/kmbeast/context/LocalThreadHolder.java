@@ -33,7 +33,8 @@ public class LocalThreadHolder {
      * @author 【chidao】
      */
     public static Integer getUserId() {
-        return USER_HOLDER.get().get("userId");
+        Map<String, Integer> map = USER_HOLDER.get();
+        return map != null ? map.get("userId") : null;
     }
 
     /**
@@ -43,7 +44,8 @@ public class LocalThreadHolder {
      * @author 【chidao】
      */
     public static Integer getRoleId() {
-        return USER_HOLDER.get().get("userRole");
+        Map<String, Integer> map = USER_HOLDER.get();
+        return map != null ? map.get("userRole") : null;
     }
 
     /**

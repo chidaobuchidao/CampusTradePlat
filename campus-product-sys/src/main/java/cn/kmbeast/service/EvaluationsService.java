@@ -6,6 +6,7 @@ import cn.kmbeast.pojo.dto.query.extend.EvaluationsQueryDto;
 import cn.kmbeast.pojo.entity.Evaluations;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 评论服务接口
@@ -23,5 +24,7 @@ public interface EvaluationsService {
     Result<String> delete(Integer id);
 
     Result<Void> update(Evaluations evaluations);
+
+    Result<Map<String, Object>> avgRating(Integer userId);
 
 }

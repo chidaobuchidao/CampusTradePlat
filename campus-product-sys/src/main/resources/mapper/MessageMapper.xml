@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kmbeast.mapper.MessageMapper">
+
+    <resultMap id="BaseResultMap" type="cn.kmbeast.pojo.entity.Message">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="sender_id" property="senderId"/>
+        <result column="receiver_id" property="receiverId"/>
+        <result column="product_id" property="productId"/>
+        <result column="content" property="content"/>
+        <result column="is_read" property="isRead"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="save">
+        INSERT INTO message (sender_id, receiver_id, product_id, content, is_read, create_time)
+        VALUES (#{senderId}, #{receiverId}, #{productId}, #{content}, 0, NOW())
+    </insert>
+
+    <select id="getChat" resultMap="BaseResultMap">
+        SELECT m.*, u.user_name AS senderName, u.user_avatar AS senderAvatar
+        FROM message m
+        LEFT JOIN user u ON u.id = m.sender_id
+        WHERE ((m.sender_id = #{userId} AND m.receiver_id = #{targetId})
+            OR (m.sender_id = #{targetId} AND m.receiver_id = #{userId}))
+        AND m.product_id = #{productId}
+        ORDER BY m.create_time ASC
+    </select>
+
+    <select id="getConversations" resultType="java.util.HashMap">
+        SELECT
+            CASE WHEN m.sender_id = #{userId} THEN m.receiver_id ELSE m.sender_id END AS uid,
+            u.user_name AS userName,
+            u.user_avatar AS userAvatar,
+            m.product_id AS productId,
+            p.name AS productName,
+            p.cover_list AS productCover,
+            p.price AS productPrice,
+            SUBSTRING(MAX(m.content), 1, 50) AS lastMsg,
+            MAX(m.create_time) AS lastTime,
+            SUM(CASE WHEN m.receiver_id = #{userId} AND m.is_read = 0 THEN 1 ELSE 0 END) AS unread
+        FROM message m
+        JOIN user u ON u.id = CASE WHEN m.sender_id = #{userId} THEN m.receiver_id ELSE m.sender_id END
+        LEFT JOIN product p ON p.id = m.product_id
+        WHERE (m.sender_id = #{userId} OR m.receiver_id = #{userId})
+          AND m.product_id > 0
+        GROUP BY uid, u.user_name, u.user_avatar, m.product_id, p.name, p.cover_list, p.price
+        ORDER BY lastTime DESC
+    </select>
+
+    <select id="getUnreadCount" resultType="integer">
+        SELECT COUNT(*) FROM message
+        WHERE receiver_id = #{userId} AND is_read = 0
+    </select>
+
+    <update id="markRead">
+        UPDATE message SET is_read = 1
+        WHERE receiver_id = #{userId} AND sender_id = #{senderId} AND is_read = 0
+        AND product_id = #{productId}
+    </update>
+
+    <update id="markAllRead">
+        UPDATE message SET is_read = 1
+        WHERE receiver_id = #{userId} AND is_read = 0
+    </update>
+
+</mapper>

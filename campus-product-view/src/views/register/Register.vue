@@ -101,112 +101,43 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-* {
-    user-select: none;
-}
+* { user-select: none; }
 
 .register-containel {
-    // background-image: url('/bag.png');
-    width: 100%;
-    min-height: 100vh;
-   // background-color: rgb(207, 192, 109);
-    display: flex;
-    /* 启用Flexbox布局 */
-    justify-content: center;
-    /* 水平居中 */
-    align-items: center;
-    /* 垂直居中 */
-    flex-direction: column;
-    /* 如果需要垂直居中，确保子元素也是这样排列 */
+    width: 100%; min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #1a5276 100%);
+    display: flex; justify-content: center; align-items: center; flex-direction: column;
+    position: relative; overflow: hidden;
 
     .register-panel {
-        margin: 0 auto;
-        width: 333px;
-        height: auto;
-        padding: 40px 30px 16px 30px;
-        border-radius: 10px;
-        background-color: rgb(255, 255, 255);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
-
-        .logo {
-            margin: 10px 0 30px 0;
-        }
-
-        .act,
-        .pwd {
-            margin: 8px 0;
-            height: 63px;
-            line-height: 63px;
-            width: 100%;
-            padding: 0 8px;
-            background-color: rgb(248,248,248);
-            box-sizing: border-box;
-            border: 1px solid rgb(248,248,248);
-            border-radius: 5px;
-            font-weight: 800;
-            font-size: 18px;
-            padding: 0 15px;
-            margin-top: 13px;
-        }
-
-        .act:focus,
-        .pwd:focus {
-            outline: none;
-            background-color: rgb(244,244,244);
-            transition: 1.2s;
-        }
-
-        .role {
-            display: inline-block;
-            color: rgb(26, 189, 91);
-            font-size: 14px;
-            padding-right: 10px;
-        }
+        margin: 0 auto; width: 380px; height: auto; padding: 40px 36px 24px;
+        border-radius: 16px; background: #fff; position: relative; z-index: 1;
+        box-shadow: 0 20px 60px rgba(0,0,0,.3);
     }
+
+    h1 { text-align: center; color: #1a1a2e; margin-bottom: 28px; font-size: 22px; }
+
+    .act, .pwd {
+        margin: 6px 0; height: 46px; line-height: 46px; width: 100%;
+        padding: 0 16px; background: #f5f7fa; box-sizing: border-box;
+        border: 2px solid #f5f7fa; border-radius: 10px; font-size: 15px;
+        margin-top: 14px; transition: all .3s;
+    }
+    .act:focus, .pwd:focus { outline: none; border-color: #409EFF; background: #fff; }
 
     .register-btn {
-        display: inline-block;
-        text-align: center;
-        border-radius: 3px;
-        margin-top: 20px;
-        height: 43px;
-        line-height: 43px;
-        width: 100%;
-        background-color: rgb(30, 190, 94);
-        font-size: 14px !important;
-        border: none;
-        color: rgb(250,250,250);
-        padding: 0 !important;
-        cursor: pointer;
-        user-select: none;
+        display: inline-block; text-align: center; border-radius: 10px;
+        margin-top: 24px; height: 46px; line-height: 46px; width: 100%;
+        background: linear-gradient(135deg, #409EFF, #337ecc);
+        font-size: 15px; border: none; color: #fff; padding: 0;
+        cursor: pointer; user-select: none; transition: all .3s; font-weight: 600; letter-spacing: 2px;
     }
+    .register-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(64,158,255,.4); }
 
-    .tip {
-        margin: 20px 0;
-
-        p {
-            padding: 3px 0;
-            font-size: 14px;
-            margin: 0;
-            color: #647897;
-
-            i {
-                margin-right: 3px;
-            }
-
-            span {
-                color: #3b3c3e;
-                border-radius: 2px;
-                margin: 0 6px;
-            }
-
-            .no-act:hover {
-                color: #568ed7;
-                cursor: pointer;
-            }
-
-        }
+    .tip { margin: 20px 0 0; text-align: center;
+        p { padding: 3px 0; font-size: 14px; margin: 0; color: #909399; }
+        .no-act { color: #409EFF; cursor: pointer; font-weight: 500; }
+        .no-act:hover { color: #337ecc; }
     }
-
 }
 </style>

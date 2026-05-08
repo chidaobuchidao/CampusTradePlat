@@ -4,8 +4,8 @@
             <img src="/logo.jpg" style="width: 220px;height: 100px;">
         </div> -->
         <div class="login-panel">
-            <div style="width: 300px;padding: 40px;display: flex;justify-content: center;align-items: center;">
-                <img src="/bag.png" style="width: 350px;" />
+            <div class="login-illustration">
+                <img src="/bag.png" />
             </div>
             <div class="right-login">
                 <div>
@@ -87,16 +87,16 @@ export default {
             }
         },
         navigateToRole(role) {
+            const redirect = this.$route.query.redirect;
             switch (role) {
                 case 1:
-                    this.$router.push('/admin');
+                    this.$router.push(redirect || '/adminLayout');
                     break;
                 case 2:
-                    console.log("用户角色：", role);
-                    this.$router.push('/user');
+                    this.$router.push(redirect || '/product');
                     break;
                 default:
-                    console.warn('未知的角色类型:', role);
+                    this.$router.push('/product');
                     break;
             }
         },
@@ -105,128 +105,65 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-* {
-    user-select: none;
-}
+* { user-select: none; }
 
 .login-container {
-    width: 100%;
-    min-height: 100vh;
-    background-color: rgb(255, 255, 255);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    width: 100%; min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #1a5276 100%);
+    display: flex; justify-content: center; align-items: center; flex-direction: column;
+    position: relative; overflow: hidden;
 
-    .login-panel {
-        display: flex;
-        border-top-left-radius: 10px;
-        padding: 20px;
-        justify-content: space-between;
-        height: auto;
-        border-radius: 6px;
-        border-top-left-radius: 100px;
-        border-bottom-left-radius: 20px;
-        // background-color: rgb(100, 119, 224);
-        background: rgb(30, 190, 94);
-        box-shadow: 1px 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
-
-        .right-login {
-            width: 283px;
-            background-color: rgb(255, 255, 255);
-            padding: 30px;
-            border-radius: 5px;
-            // border-top-left-radius: 150px;
-            // border-bottom-left-radius: 5px;
-            // border-top-right-radius: 5px;
-            // border-bottom-right-radius: 5px;
-        }
-
-        .logo {
-            margin: 10px 0 30px 0;
-        }
-
-        .act,
-        .pwd {
-            margin: 8px 0;
-            height: 63px;
-            line-height: 63px;
-            width: 100%;
-            font-size: 20px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-weight: 800;
-            padding: 0 8px;
-            background-color: rgb(248, 248, 248);
-            box-sizing: border-box;
-            border: 2px solid rgb(255, 255, 255);
-            border-radius: 6px;
-            padding: 0 15px;
-            margin-top: 13px;
-        }
-
-        .act:focus,
-        .pwd:focus {
-            outline: none;
-            //border: 2px solid rgb(16, 170, 209);
-            transition: 1.2s;
-            background-color: rgb(244, 244, 244);
-        }
-
-        .role {
-            display: inline-block;
-            color: rgb(30, 102, 147);
-            font-size: 14px;
-            padding-right: 10px;
-        }
+    &::before {
+        content: ''; position: absolute; width: 600px; height: 600px;
+        border-radius: 50%; background: rgba(255,208,75,.04);
+        top: -200px; right: -100px;
+    }
+    &::after {
+        content: ''; position: absolute; width: 400px; height: 400px;
+        border-radius: 50%; background: rgba(64,158,255,.05);
+        bottom: -100px; left: -80px;
     }
 
-    .login-btn:hover {
-        background-color: rgb(25, 180, 87);
+    .login-panel {
+        display: flex; padding: 0; justify-content: center; height: auto;
+        border-radius: 16px; overflow: hidden; position: relative; z-index: 1;
+        background: #fff;
+        box-shadow: 0 20px 60px rgba(0,0,0,.3);
+
+        .login-illustration {
+            width: 320px; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #f8f9ff, #e8ecf4);
+            img { width: 260px; }
+        }
+        .right-login {
+            width: 340px; padding: 40px 36px;
+            h2 { text-align: center; color: #1a1a2e; margin-bottom: 30px; }
+        }
+
+        .act, .pwd {
+            margin: 6px 0; height: 48px; line-height: 48px; width: 100%;
+            font-size: 15px; padding: 0 16px; background: #f5f7fa;
+            box-sizing: border-box; border: 2px solid #f5f7fa; border-radius: 10px; margin-top: 14px;
+            transition: all .3s;
+        }
+        .act:focus, .pwd:focus { outline: none; border-color: #409EFF; background: #fff; }
+        .act:hover, .pwd:hover { background: #eef1f6; }
     }
 
     .login-btn {
-        display: inline-block;
-        text-align: center;
-        border-radius: 3px;
-        margin-top: 20px;
-        height: 43px;
-        line-height: 43px;
-        width: 100%;
-        background-color: rgb(30, 190, 94);
-        font-size: 14px !important;
-        border: none;
-        color: white;
-        padding: 0 !important;
-        cursor: pointer;
-        user-select: none;
+        display: inline-block; text-align: center; border-radius: 10px;
+        margin-top: 24px; height: 46px; line-height: 46px; width: 100%;
+        background: linear-gradient(135deg, #409EFF, #337ecc); font-size: 15px;
+        border: none; color: white; padding: 0; cursor: pointer;
+        user-select: none; transition: all .3s; font-weight: 600; letter-spacing: 2px;
     }
+    .login-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(64,158,255,.4); }
 
     .tip {
-        margin: 20px 0;
-
-        p {
-            padding: 3px 0;
-            margin: 0;
-            font-size: 14px;
-            color: #647897;
-
-            i {
-                margin-right: 3px;
-            }
-
-            span {
-                color: #3b3c3e;
-                border-radius: 2px;
-                margin: 0 6px;
-            }
-
-            .no-act:hover {
-                color: #3e77c2;
-                cursor: pointer;
-            }
-
-        }
+        margin: 24px 0 0; text-align: center;
+        p { padding: 3px 0; margin: 0; font-size: 14px; color: #909399; }
+        .no-act { color: #409EFF; cursor: pointer; font-weight: 500; }
+        .no-act:hover { color: #337ecc; }
     }
-
 }
 </style>

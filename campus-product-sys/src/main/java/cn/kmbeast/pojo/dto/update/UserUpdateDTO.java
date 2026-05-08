@@ -32,4 +32,9 @@ public class UserUpdateDTO {
      * 用户邮箱
      */
     private String userEmail;
+
+    /**
+     * 个人签名
+     */
+    private String signature;
 }

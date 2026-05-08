@@ -4,7 +4,7 @@
             <h2 class="commentHeader">评论&nbsp;{{ evaluationsCount }}</h2>
             <el-row style="margin: 15px 0;">
                 <el-col :span="2">
-                    <el-avatar :src="userData.userAvatar"></el-avatar>
+                    <el-avatar :src="$imgUrl(userData.userAvatar)"></el-avatar>
                 </el-col>
                 <el-col :span="22">
                     <div class="parent-comment"
@@ -25,10 +25,10 @@
             <el-row v-for="(comment, index) in commentList " :key="index" style="padding: 10px 0;">
                 <el-row>
                     <el-col :span="2">
-                        <el-avatar size="large" :src="comment.userAvatar"></el-avatar>
+                        <el-avatar size="large" :src="$imgUrl(comment.userAvatar)" style="cursor:pointer;" @click.native="$router.push('/user/' + comment.userId)"></el-avatar>
                     </el-col>
                     <el-col :span="22">
-                        <span style="height: 40px;line-height: 40px;font-size: 16px;color: #515767;">{{
+                        <span style="height: 40px;line-height: 40px;font-size: 16px;color: #515767;cursor:pointer;" @click="$router.push('/user/' + comment.userId)">{{
                             comment.userName }}</span>
                         <span v-if="comment.userId == userId" class="my-body-tag">我自己</span>
                     </el-col>
@@ -85,17 +85,17 @@
                     <el-row>
                         <el-col :span="22" :offset="2">
                             <el-row style="display: flex; align-items: center; flex-wrap: wrap;">
-                                <el-avatar size="small" :src="commentChild.userAvatar"
-                                    style="margin-right: 5px;"></el-avatar>
-                                <span style="color: #515767; padding: 0 5px;">{{ commentChild.userName }}</span>
+                                <el-avatar size="small" :src="$imgUrl(commentChild.userAvatar)"
+                                    style="margin-right: 5px;cursor:pointer;" @click.native="$router.push('/user/' + commentChild.userId)"></el-avatar>
+                                <span style="color: #515767; padding: 0 5px;cursor:pointer;" @click="$router.push('/user/' + commentChild.userId)">{{ commentChild.userName }}</span>
                                 <span v-if="commentChild.userId == userId" class="my-body-tag">我自己</span>
                                 <span v-if="commentChild.replierName != null"
                                     style="margin:0 15px;color: #1c1c1c;user-select: none;font-size: 12px;">
                                     回复
                                 </span>
                                 <el-avatar v-if="commentChild.replierName != null" size="small"
-                                    :src="commentChild.replierAvatar" style="margin-right: 5px;"></el-avatar>
-                                <span v-if="commentChild.replierName != null" style="color: #515767;padding: 0 5px;">{{
+                                    :src="$imgUrl(commentChild.replierAvatar)" style="margin-right: 5px;cursor:pointer;" @click.native="$router.push('/user/' + commentChild.replierId)"></el-avatar>
+                                <span v-if="commentChild.replierName != null" style="color: #515767;padding: 0 5px;cursor:pointer;" @click="$router.push('/user/' + commentChild.replierId)">{{
                                     commentChild.replierName }}</span>
                                 <span v-if="commentChild.replierId == userId" class="my-body-tag">我自己</span>
                                 <span
@@ -114,7 +114,7 @@
                                         删除
                                     </span>
                                 </el-popconfirm>
-                                <span @click="toggleReplyInput1(commentChild)"
+                                <span @click="toggleReplyInput(commentChild)"
                                     style="cursor: pointer;margin-left: 15px;font-size: 14px;color: #8A919F;user-select: none;">
                                     <i class="el-icon-chat-dot-round"></i>
                                     回复
@@ -137,7 +137,7 @@
                                             <span class="comment-input-number">{{ replyChildContent.length }} /
                                                 300</span>
                                             <el-button style="background-color: #007bff;"
-                                                @click="submitReply1(commentChild)" class="comment-clike" size="mini"
+                                                @click="submitReply(commentChild)" class="comment-clike" size="mini"
                                                 type="primary">评论</el-button>
                                         </div>
                                     </div>
@@ -187,20 +187,15 @@ export default {
     data() {
         return {
             userData: {},
-            noteData: {},
-            commentContent: '',
             content: '',
             commentList: [],
             replyContent: '',
-            id: null,
             isFocused: false,
             bgColor: 'rgb(245 245 245)',
-            strLength: '0/300',
             replyText: '',
             userId: '',
             dialogVisibleReport: false,
             reports: [],
-            selectdStatus: false,
             evaluationsCount: 0,
             comment: {},
             replyChildContent: '',
@@ -226,36 +221,33 @@ export default {
     methods: {
         getUserInfo() {
             const userInfo = sessionStorage.getItem("userInfo");
-            this.userData = JSON.parse(userInfo);
-            this.userId = this.userData.id;
+            if (userInfo) {
+                this.userData = JSON.parse(userInfo) || {};
+                this.userId = this.userData.id;
+            }
         },
         // 点赞 或 取消点赞
         upvote(comment) {
+            if (!this.userId) { this.$message('请先登录'); return; }
             let upvoteList = comment.upvoteList ? comment.upvoteList.split(',') : [];
-            if (upvoteList.length) {
-                // 界面反映
-                if (comment.upvoteFlag) {
-                    // 取消点赞
-                    let index = upvoteList.indexOf(this.userData.id.toString());
-                    if (index !== -1) {
-                        upvoteList.splice(index, 1); // 移除用户ID
-                    }
-                } else {
-                    // 点赞
-                    if (!upvoteList.includes(this.userData.userId.toString())) {
-                        upvoteList.push(this.userData.userId.toString()); // 添加用户ID
-                    }
-                }
+            const uid = String(this.userId);
+            if (comment.upvoteFlag) {
+                // 取消点赞
+                const idx = upvoteList.indexOf(uid);
+                if (idx !== -1) upvoteList.splice(idx, 1);
+            } else {
+                // 点赞
+                if (!upvoteList.includes(uid)) upvoteList.push(uid);
             }
-            let evalustions = {
+            const evalustions = {
                 id: comment.id,
-                upvoteList: upvoteList.length ? upvoteList.join(',') : this.userData.id
+                upvoteList: upvoteList.join(',')
             }
             this.$axios.put(`evaluations/update`, evalustions).then(res => {
                 if (res.data.code == 200) {
-                    comment.upvoteList = upvoteList.join(','); // 更新upvoteList字符串
-                    comment.upvoteFlag = !comment.upvoteFlag; // 切换点赞状态标志
-                    comment.upvoteCount += 1;
+                    comment.upvoteList = upvoteList.join(',');
+                    comment.upvoteFlag = !comment.upvoteFlag;
+                    comment.upvoteCount = upvoteList.length;
                 }
             }).catch(err => {
                 console.error(`点赞状态设置异常 -> `, err);
@@ -395,105 +387,28 @@ export default {
                 console.error(`评论异常 -> `, err);
             })
         },
-        // 父级评论回复点击
         toggleReplyInput(comment) {
             this.replyText = `回复${comment.userName}...`;
-            if (comment.showReplyInput == null) {
-                comment.showReplyInput = false;
-            }
-            comment.showReplyInput = !comment.showReplyInput;
+            const key = comment.parentId != null ? 'replyInputStatus' : 'showReplyInput';
+            if (comment[key] == null) comment[key] = false;
+            comment[key] = !comment[key];
         },
-        // 子级评论回复点击
-        toggleReplyInput1(comment) {
-            if (comment.replyInputStatus == null) {
-                comment.replyInputStatus = false;
-            }
-            comment.replyInputStatus = !comment.replyInputStatus;
-        },
-        // 父级评论回复提交
         submitReply(comment) {
-            if (this.replyContent == '') {
-                this.$message(`评论内容不能为空`);
-                return;
-            }
-            const evaluationsDTO = {
-                contentType: this.contentType,
-                content: this.replyContent,
-                contentId: this.contentId,
-                parentId: comment.id
-            }
-            this.$axios.post(`evaluations/insert`, evaluationsDTO).then(res => {
+            const isChild = comment.parentId != null;
+            const content = isChild ? this.replyChildContent : this.replyContent;
+            if (!content) { this.$message('评论内容不能为空'); return; }
+            const dto = { contentType: this.contentType, content, contentId: this.contentId, parentId: isChild ? comment.parentId : comment.id };
+            if (isChild) dto.replierId = comment.userId;
+            this.$axios.post('evaluations/insert', dto).then(res => {
                 if (res.data.code == 200) {
-                    this.replyContent = '';
-                    comment.showReplyInput = false;
-                    this.$swal.fire({
-                        title: '回复操作',
-                        text: '回复成功',
-                        icon: 'success',
-                        showConfirmButton: false,
-                        timer: 1300
-                    });
-                    setTimeout(() => {
-                        // 重新加载评论列表
-                        this.loadCommentList();
-                    }, 1300)
-                }else{
-                    this.$swal.fire({
-                        title: '评论异常',
-                        text: res.data.msg,
-                        icon: 'error',
-                        showConfirmButton: false,
-                        timer: 1100
-                    });
+                    if (isChild) { this.replyChildContent = ''; comment.replyInputStatus = false; }
+                    else { this.replyContent = ''; comment.showReplyInput = false; }
+                    this.$swal.fire({ title: '回复操作', text: '回复成功', icon: 'success', showConfirmButton: false, timer: 1300 });
+                    setTimeout(() => this.loadCommentList(), 1300);
+                } else {
+                    this.$swal.fire({ title: '评论异常', text: res.data.msg, icon: 'error', showConfirmButton: false, timer: 1100 });
                 }
-            }).catch(err => {
-                console.error(`评论异常 -> `, err);
-            })
-        },
-        // 子级评论回复提交
-        submitReply1(comment) {
-            if (this.replyChildContent == '') {
-                this.$message(`评论内容不能为空`);
-                return;
-            }
-            const evaluationsDTO = {
-                replierId: comment.userId,
-                contentType: this.contentType,
-                content: this.replyChildContent,
-                contentId: this.contentId,
-                parentId: comment.parentId
-            }
-            this.$axios.post(`evaluations/insert`, evaluationsDTO).then(res => {
-                if (res.data.code == 200) {
-                    this.content = '';
-                    comment.replyInputStatus = false;
-                    this.$swal.fire({
-                        title: '回复操作',
-                        text: '回复成功',
-                        icon: 'success',
-                        showConfirmButton: false,
-                        timer: 1300
-                    });
-                    setTimeout(() => {
-                        // 重新加载评论列表
-                        this.loadCommentList();
-                    }, 1300)
-                }else{
-                    this.$swal.fire({
-                        title: '评论异常',
-                        text: res.data.msg,
-                        icon: 'error',
-                        showConfirmButton: false,
-                        timer: 1100
-                    });
-                }
-            }).catch(err => {
-                console.error(`评论异常 -> `, err);
-            })
-        },
-        goBack() {
-            // 返回上一级
-            this.$router.go(-1);
+            });
         },
         // 加载评论列表
         loadCommentList() {
@@ -501,12 +416,20 @@ export default {
                 if (res.data.code == 200) {
                     this.commentList = res.data.data.data;
                     this.evaluationsCount = res.data.data.evaluationsCount;
-                    // 父级评论
+                    const uid = String(this.userId || '');
                     this.commentList.forEach(entity => {
-                        // 时间转换
                         entity.time = timeAgo(entity.createTime);
-                        // 子级评论
-                        entity.commentChildVOS.forEach(entity => entity.time = timeAgo(entity.createTime));
+                        const ul = entity.upvoteList ? entity.upvoteList.split(',') : [];
+                        entity.upvoteFlag = uid ? ul.includes(uid) : false;
+                        entity.upvoteCount = ul.length;
+                        if (entity.commentChildVOS) {
+                            entity.commentChildVOS.forEach(child => {
+                                child.time = timeAgo(child.createTime);
+                                const cul = child.upvoteList ? child.upvoteList.split(',') : [];
+                                child.upvoteFlag = uid ? cul.includes(uid) : false;
+                                child.upvoteCount = cul.length;
+                            });
+                        }
                     });
                 }
             }).catch(err => {

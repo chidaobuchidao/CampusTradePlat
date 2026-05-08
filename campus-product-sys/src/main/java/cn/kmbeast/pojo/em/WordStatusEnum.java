@@ -11,7 +11,7 @@ import lombok.Getter;
 public enum WordStatusEnum {
 
     USE(false, "可用"),
-    BANK_USE(true, "禁言状态");
+    BAN_USE(true, "禁言状态");
 
     /**
      * 状态

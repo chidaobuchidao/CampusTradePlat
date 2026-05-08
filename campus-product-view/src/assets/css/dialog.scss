@@ -44,5 +44,13 @@
 
 
 .el-dialog {
-    border-radius: 8px !important;
+    border-radius: 14px !important;
+    animation: dialogSlideIn 0.3s cubic-bezier(0.4,0,0.2,1);
 }
+@keyframes dialogSlideIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.el-dialog__header { padding: 22px 24px 8px !important; }
+.el-dialog__body { padding: 16px 24px !important; }
+.el-dialog__footer { padding: 12px 24px 22px !important; }

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kmbeast.mapper.OrdersMapper">
+
+    <resultMap id="BaseResultMap" type="cn.kmbeast.pojo.entity.Orders">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="detail" property="detail"/>
+        <result column="address" property="address"/>
+        <result column="phone" property="phone"/>
+        <result column="remark" property="remark"/>
+        <result column="user_id" property="userId"/>
+        <result column="product_id" property="productId"/>
+        <result column="price" property="price"/>
+        <result column="trade_status" property="tradeStatus"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="pay_time" property="payTime"/>
+    </resultMap>
+
+    <insert id="save">
+        INSERT INTO orders (code, detail, address, phone, remark, user_id, product_id, price, trade_status, status, create_time)
+        VALUES (#{code}, #{detail}, #{address}, #{phone}, #{remark}, #{userId}, #{productId}, #{price}, #{tradeStatus}, #{status}, #{createTime})
+    </insert>
+
+    <update id="update">
+        UPDATE orders
+        <set>
+            <if test="tradeStatus != null">
+                trade_status = #{tradeStatus},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="payTime != null">
+                pay_time = #{payTime},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="getById" resultMap="BaseResultMap">
+        SELECT * FROM orders WHERE id = #{id}
+    </select>
+
+    <resultMap id="DetailResultMap" type="cn.kmbeast.pojo.entity.Orders">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="detail" property="detail"/>
+        <result column="address" property="address"/>
+        <result column="phone" property="phone"/>
+        <result column="remark" property="remark"/>
+        <result column="userId" property="userId"/>
+        <result column="productId" property="productId"/>
+        <result column="price" property="price"/>
+        <result column="tradeStatus" property="tradeStatus"/>
+        <result column="status" property="status"/>
+        <result column="createTime" property="createTime"/>
+        <result column="payTime" property="payTime"/>
+        <result column="productName" property="productName"/>
+        <result column="coverList" property="coverList"/>
+        <result column="sellerName" property="sellerName"/>
+        <result column="buyerName" property="buyerName"/>
+    </resultMap>
+
+    <select id="query" resultMap="DetailResultMap">
+        SELECT o.id, o.code, o.detail, o.address, o.phone, o.remark,
+               o.user_id AS userId, o.product_id AS productId,
+               o.price, o.trade_status AS tradeStatus, o.status,
+               o.create_time AS createTime, o.pay_time AS payTime,
+               p.name AS productName, p.cover_list AS coverList,
+               u.user_name AS sellerName, b.user_name AS buyerName
+        FROM orders o
+        LEFT JOIN product p ON o.product_id = p.id
+        LEFT JOIN user u ON p.user_id = u.id
+        LEFT JOIN user b ON o.user_id = b.id
+        <where>
+            <if test="buyerId != null and sellerId != null">
+                AND (o.user_id = #{buyerId} OR p.user_id = #{sellerId})
+            </if>
+            <if test="buyerId != null and sellerId == null">
+                AND o.user_id = #{buyerId}
+            </if>
+            <if test="sellerId != null and buyerId == null">
+                AND p.user_id = #{sellerId}
+            </if>
+            <if test="tradeStatus != null">
+                AND o.trade_status = #{tradeStatus}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND o.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+        ORDER BY o.create_time DESC
+        <if test="current != null and size != null">
+            LIMIT #{current},#{size}
+        </if>
+    </select>
+
+    <select id="queryCount" resultType="integer">
+        SELECT COUNT(*)
+        FROM orders o
+        LEFT JOIN product p ON o.product_id = p.id
+        <where>
+            <if test="buyerId != null and sellerId != null">
+                AND (o.user_id = #{buyerId} OR p.user_id = #{sellerId})
+            </if>
+            <if test="buyerId != null and sellerId == null">
+                AND o.user_id = #{buyerId}
+            </if>
+            <if test="sellerId != null and buyerId == null">
+                AND p.user_id = #{sellerId}
+            </if>
+            <if test="tradeStatus != null">
+                AND o.trade_status = #{tradeStatus}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND o.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 软删除：取消订单 -->
+    <update id="cancelById">
+        UPDATE orders SET status = 5 WHERE id = #{id}
+    </update>
+
+    <select id="findByProductAndBuyer" resultMap="BaseResultMap">
+        SELECT * FROM orders
+        WHERE product_id = #{productId} AND user_id = #{userId} AND status = 0
+        ORDER BY create_time DESC
+        LIMIT 1
+    </select>
+
+    <!-- 统计：买家已支付总金额和订单数 -->
+    <select id="sumByBuyer" resultType="java.util.HashMap">
+        SELECT COUNT(*) AS total,
+               IFNULL(SUM(price), 0) AS amount
+        FROM orders
+        WHERE user_id = #{userId} AND status IN (1,2,3,4)
+    </select>
+
+    <!-- 统计：卖家已支付总金额和订单数 -->
+    <select id="sumBySeller" resultType="java.util.HashMap">
+        SELECT COUNT(*) AS total,
+               IFNULL(SUM(o.price), 0) AS amount
+        FROM orders o
+        LEFT JOIN product p ON o.product_id = p.id
+        WHERE p.user_id = #{userId} AND o.status IN (1,2,3,4)
+    </select>
+
+    <!-- 统计：按订单状态分组计数 -->
+    <select id="countByStatus" resultType="java.util.HashMap">
+        SELECT
+            SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) AS pending,
+            SUM(CASE WHEN status IN (1,2,3) THEN 1 ELSE 0 END) AS processing,
+            SUM(CASE WHEN status = 4 THEN 1 ELSE 0 END) AS completed,
+            SUM(CASE WHEN status = 5 THEN 1 ELSE 0 END) AS cancelled
+        FROM orders o
+        LEFT JOIN product p ON o.product_id = p.id
+        WHERE o.user_id = #{userId} OR p.user_id = #{userId}
+    </select>
+
+    <!-- 统计：近6个月每月支出和收入 -->
+    <select id="monthlyStats" resultType="java.util.HashMap">
+        SELECT DATE_FORMAT(t.month_date, '%Y-%m') AS month,
+               IFNULL(spend.spendAmount, 0) AS spend,
+               IFNULL(earn.earnAmount, 0) AS earn
+        FROM (
+            SELECT DATE_FORMAT(DATE_SUB(NOW(), INTERVAL n MONTH), '%Y-%m-01') AS month_date
+            FROM (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5) nums
+        ) t
+        LEFT JOIN (
+            SELECT DATE_FORMAT(create_time, '%Y-%m-01') AS m, SUM(price) AS spendAmount
+            FROM orders WHERE user_id = #{userId} AND status IN (1,2,3,4)
+            GROUP BY DATE_FORMAT(create_time, '%Y-%m-01')
+        ) spend ON spend.m = t.month_date
+        LEFT JOIN (
+            SELECT DATE_FORMAT(o.create_time, '%Y-%m-01') AS m, SUM(o.price) AS earnAmount
+            FROM orders o LEFT JOIN product p ON o.product_id = p.id
+            WHERE p.user_id = #{userId} AND o.status IN (1,2,3,4)
+            GROUP BY DATE_FORMAT(o.create_time, '%Y-%m-01')
+        ) earn ON earn.m = t.month_date
+        ORDER BY t.month_date ASC
+    </select>
+
+</mapper>

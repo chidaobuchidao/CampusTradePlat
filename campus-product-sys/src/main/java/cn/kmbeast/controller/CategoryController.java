@@ -27,6 +27,7 @@ public class CategoryController {
      * @param category 参数
      * @return Result<String> 响应结果
      */
+    @Protector(role = "管理员")
     @PostMapping(value = "/save")
     @ResponseBody
     public Result<String> save(@RequestBody Category category) {
@@ -39,6 +40,7 @@ public class CategoryController {
      * @param category 参数
      * @return Result<String> 响应结果
      */
+    @Protector(role = "管理员")
     @PutMapping(value = "/update")
     @ResponseBody
     public Result<String> update(@RequestBody Category category) {

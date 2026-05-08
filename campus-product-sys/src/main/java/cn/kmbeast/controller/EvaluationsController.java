@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 评论 Controller
@@ -75,6 +76,7 @@ public class EvaluationsController {
      *
      * @return Result<String>
      */
+    @Protector(role = "管理员")
     @PostMapping(value = "/batchDelete")
     @ResponseBody
     public Result<Object> batchDelete(@RequestBody List<Integer> ids) {
@@ -91,6 +93,24 @@ public class EvaluationsController {
     @ResponseBody
     public Result<String> delete(@PathVariable Integer id) {
         return evaluationsService.delete(id);
+    }
+
+    /**
+     * 查询用户平均评分（公开）
+     */
+    @GetMapping(value = "/avgRating/{userId}")
+    @ResponseBody
+    public Result<Map<String, Object>> avgRating(@PathVariable Integer userId) {
+        return evaluationsService.avgRating(userId);
+    }
+
+    /**
+     * 查询用户评价列表（公开，用于用户主页）
+     */
+    @GetMapping(value = "/userReviews/{userId}")
+    @ResponseBody
+    public Result<Object> userReviews(@PathVariable Integer userId) {
+        return evaluationsService.list(userId, "USER");
     }
 
 }

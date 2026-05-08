@@ -19,6 +19,7 @@
                     <i class="el-icon-arrow-down el-icon--right" style="margin-left: 5px;"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item icon="el-icon-s-home" @click.native="goFrontend">返回前台</el-dropdown-item>
                     <el-dropdown-item icon="el-icon-user-solid" @click.native="userCenterPanel">个人资料</el-dropdown-item>
                     <el-dropdown-item icon="el-icon-s-fold" @click.native="loginOut">退出登录</el-dropdown-item>
                 </el-dropdown-menu>
@@ -58,6 +59,9 @@ export default {
         // 退出登录，传回父组件处理
         loginOut() {
             this.$emit('eventListener', 'loginOut');
+        },
+        goFrontend() {
+            this.$router.push('/product');
         },
         operation() {
             this.showFlag = !this.showFlag;

@@ -29,7 +29,7 @@
                     </p>
                     <el-upload class="avatar-uploader" action="/api/campus-product-sys/v1.0/file/upload"
                         :show-file-list="false" :on-success="handleAvatarSuccess">
-                        <img v-if="userInfo.url" :src="userInfo.url" style="width: 80px;height: 80px;">
+                        <img v-if="userInfo.url" :src="$imgUrl(userInfo.url)" style="width: 80px;height: 80px;">
                         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                     </el-upload>
                 </el-row>
@@ -93,6 +93,9 @@ export default {
         this.adminRoutes = menus.children;
         this.tokenCheckLoad();
         this.menuOperationHistory();
+        if (this.$router.currentRoute.fullPath === '/admin' || this.$router.currentRoute.fullPath === '/adminLayout') {
+            this.$router.push('/adminLayout');
+        }
     },
 
     methods: {
@@ -134,7 +137,7 @@ export default {
                 return;
             }
             this.$message.success(`头像上传成功`);
-            this.userInfo.url = res.data;
+            this.userInfo.url = res.data || res.msg;
         },
         eventListener(event) {
             // 个人中心
@@ -194,7 +197,7 @@ export default {
                 const { id, userAvatar: url, userName: name, userRole: role, userEmail: email } = res.data.data;
                 this.userInfo = { id, url, name, role, email };
                 // 根据角色解析路由
-                const rolePath = role === 1 ? '/admin' : '/user';
+                const rolePath = role === 1 ? '/admin' : '/';
                 const targetMenu = router.options.routes.find(route => route.path === rolePath);
                 if (targetMenu) {
                     this.routers = targetMenu.children;

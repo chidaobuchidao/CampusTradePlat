@@ -18,4 +18,5 @@ public class CategoryQueryDto extends QueryDto {
      * 是否启用
      */
     private Boolean isUse;
+    private Integer parentId;
 }

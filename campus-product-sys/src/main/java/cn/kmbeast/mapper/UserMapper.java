@@ -5,6 +5,7 @@ import cn.kmbeast.pojo.entity.User;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户持久化接口
@@ -58,5 +59,9 @@ public interface UserMapper {
      * @return User
      */
     User getByActive(User user);
+
+    List<Map<String, Object>> countByRole();
+
+    List<Map<String, Object>> countByDay();
 
 }

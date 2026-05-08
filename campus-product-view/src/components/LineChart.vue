@@ -15,7 +15,7 @@
 </template>
 <script>
 // 折线图组件
-import * as echarts from 'echarts';
+import echarts from 'echarts';
 export default {
   name: 'DialogLine',
   props: {

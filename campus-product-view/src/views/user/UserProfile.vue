@@ -150,8 +150,8 @@ export default {
             this.$axios.get('/evaluations/userReviews/' + this.userId).then(res => {
                 if (res.data.code === 200) {
                     const vo = res.data.data;
-                    this.reviews = vo.commentParentVOS || [];
-                    this.reviewTotal = vo.totalCount || 0;
+                    this.reviews = vo.data || [];
+                    this.reviewTotal = vo.count || 0;
                 }
             });
         },

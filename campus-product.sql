@@ -113,7 +113,7 @@ CREATE TABLE `message` (
   `sender_id`   int(11)      DEFAULT NULL COMMENT '发送者用户ID',
   `receiver_id` int(11)      DEFAULT NULL COMMENT '接收者用户ID',
   `product_id`  int(11)      DEFAULT NULL COMMENT '关联商品ID',
-  `content`     varchar(255) DEFAULT NULL COMMENT '消息内容',
+  `content`     text         DEFAULT NULL COMMENT '消息内容',
   `is_read`     tinyint(1)   DEFAULT 0    COMMENT '是否已读(0:未读 1:已读)',
   `create_time` datetime     DEFAULT NULL COMMENT '发送时间',
   PRIMARY KEY (`id`)

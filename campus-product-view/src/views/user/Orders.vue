@@ -254,7 +254,7 @@ export default {
                 content: ''
             };
             // 获取卖家ID
-            this.$axios.get('/product/detail/' + order.productId).then(res => {
+            this.$axios.get('/product/getById/' + order.productId).then(res => {
                 if (res.data.code === 200) {
                     this.reviewForm.sellerId = res.data.data.userId;
                 }
@@ -279,7 +279,10 @@ export default {
                 if (res.data.code === 200) {
                     this.$message.success('评价成功');
                     this.reviewDialogVisible = false;
-                    this.fetchData();
+                    // 评价后自动完成订单
+                    this.$axios.put('/orders/complete', { id: this.reviewForm.orderId }).then(() => {
+                        this.fetchData();
+                    });
                 } else { this.$message.error(res.data.msg); }
             }).finally(() => { this.reviewSaving = false; });
         },

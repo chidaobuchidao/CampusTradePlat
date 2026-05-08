@@ -241,7 +241,7 @@
 <script>
 import { getToken, clearToken } from "@/utils/storage";
 import md5 from 'js-md5';
-import * as echarts from 'echarts';
+import echarts from 'echarts';
 
 const UPLOAD_URL = (process.env.VUE_APP_API_BASE_URL || 'http://localhost:21090/api/campus-product-sys/v1.0') + '/file/upload';
 
@@ -306,6 +306,9 @@ export default {
                     this.userInfo = res.data.data;
                     this.editForm = { userName: res.data.data.userName, userEmail: res.data.data.userEmail, signature: res.data.data.signature || '' };
                 }
+            }).catch(err => {
+                console.error('loadUser failed:', err);
+                this.$message.error('加载用户信息失败');
             });
         },
         loadStats() {
@@ -319,7 +322,9 @@ export default {
                 if (o.data.code === 200) this.stats.myOrders = o.data.total || 0;
                 if (s.data.code === 200) this.stats.mySaves = s.data.total || 0;
                 if (f.data.code === 200) this.stats.myPosts = f.data.total || 0;
-            }).catch(() => {});
+            }).catch(err => {
+                console.error('loadStats failed:', err);
+            });
         },
         onAvatarSuccess(res) {
             if ((res.code || res.msg) && !res.code) return;
